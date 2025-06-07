@@ -1,0 +1,83 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Roue de la Chance - Just'éco Solidaire</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <img src="logo.png" alt="Just'éco Solidaire" class="logo">
+    <h1>🎁 Jeu de Grattage Just'éco Solidaire</h1>
+    <p>Grattez les 6 cases et retrouvez 3 produits identiques pour gagner !</p>
+  </header>
+
+  <main>
+    <div class="scratch-card" id="scratchCard"></div>
+    <h2 id="result"></h2>
+    <button id="rejouer" onclick="location.reload()">Rejouer</button>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Just'éco Solidaire</p>
+  </footer>
+
+  <script>
+    if (localStorage.getItem('scratchPlayed') === new Date().toLocaleDateString()) {
+      document.getElementById('result').innerText = '⛔ Vous avez déjà joué aujourd'hui. Revenez demain !';
+      document.getElementById('scratchCard').style.display = 'none';
+    } else {
+      const images = [
+        "emoji_1.png", "emoji_2.png", "emoji_3.png",
+        "emoji_4.png", "emoji_5.png", "emoji_6.png"
+      ];
+
+      let selectedImages = [];
+      for (let i = 0; i < 6; i++) {
+        const rand = images[Math.floor(Math.random() * images.length)];
+        selectedImages.push(rand);
+      }
+
+      const cardContainer = document.getElementById("scratchCard");
+      let revealedCount = 0;
+      let foundImages = [];
+
+      selectedImages.forEach((imgSrc, index) => {
+        const card = document.createElement("div");
+        card.className = "card";
+        const img = document.createElement("img");
+        img.src = imgSrc;
+        card.appendChild(img);
+
+        card.addEventListener("click", () => {
+          if (!card.classList.contains("revealed")) {
+            card.classList.add("revealed");
+            revealedCount++;
+            foundImages.push(imgSrc);
+
+            if (revealedCount === 6) {
+              localStorage.setItem('scratchPlayed', new Date().toLocaleDateString());
+
+              const counts = {};
+              foundImages.forEach(img => {
+                counts[img] = (counts[img] || 0) + 1;
+              });
+              const result = Object.entries(counts).find(([k, v]) => v >= 3);
+              const resultText = document.getElementById("result");
+              document.getElementById("rejouer").style.display = "inline-block";
+              if (result) {
+                resultText.innerText = `🎉 Bravo ! Vous avez gagné le produit : ${result[0]}`;
+              } else {
+                resultText.innerText = "😢 Désolé, vous n'avez pas 3 produits identiques.";
+              }
+            }
+          }
+        });
+
+        cardContainer.appendChild(card);
+      });
+    }
+  </script>
+</body>
+</html>
